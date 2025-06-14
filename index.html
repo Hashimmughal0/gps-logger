@@ -1,0 +1,87 @@
+<html>
+<head>
+    <title>GPS Logger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f4f4f4;
+            margin: 0;
+        }
+        #container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #status {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h2>GPS Logger</h2>
+        <p>This page will fetch and send your GPS location.</p>
+        <div id="status">Fetching location...</div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById("status");
+
+        function sendGPS(latitude, longitude) {
+            const endpoint = "https://webhook.site/55dfb589-bf19-4104-bfa6-ffd1fb908fdc"; // Replace with your webhook URL
+            fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    latitude: latitude,
+                    longitude: longitude,
+                    timestamp: new Date().toISOString()
+                })
+            })
+            .then(response => {
+                statusEl.textContent = "Location sent successfully!";
+            })
+            .catch(error => {
+                statusEl.textContent = "Failed to send location.";
+                console.error(error);
+            });
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        statusEl.textContent = `Latitude: ${latitude}, Longitude: ${longitude}`;
+                        sendGPS(latitude, longitude);
+                    },
+                    (error) => {
+                        statusEl.textContent = "Error retrieving location.";
+                        console.error(error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                statusEl.textContent = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        getLocation();
+    </script>
+</body>
+</html>
